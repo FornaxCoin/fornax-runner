@@ -8,7 +8,6 @@ const rl = readline.createInterface({input, output, prompt: 'OHAI> '});
 let config = null;
 let message;
 var osValue = process.platform;
-const shell = require('shelljs')
 
 async function readConfig() {
     config = fs.readFileSync('config.json', "utf-8");
