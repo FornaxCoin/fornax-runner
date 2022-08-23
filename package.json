@@ -8,8 +8,5 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "chmodr": "^1.2.0"
-  }
+  "license": "ISC"
 }
