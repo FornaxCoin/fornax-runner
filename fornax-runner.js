@@ -2,11 +2,13 @@ const fs = require('fs')
 const {networkInterfaces} = require('os');
 const nets = networkInterfaces();
 const readline = require('node:readline');
-const {exec} = require("child_process");
+const {exec, execSync} = require("child_process");
 const {stdin: input, stdout: output} = require('node:process');
 const rl = readline.createInterface({input, output, prompt: 'OHAI> '});
 let config = null;
 let message;
+var osValue = process.platform;
+const shell = require('shelljs')
 
 async function readConfig() {
     config = fs.readFileSync('config.json', "utf-8");
@@ -136,41 +138,28 @@ async function runGethWithScreen( command, path = '~/fornax/geth/', screenName =
     if(path==='default'){
         path = '~/fornax/geth/'
     }
-    return new Promise((resolve) => {
         let cmd = 'screen -S '+screenName+' -m -- sh -c \''+ path + './' + command+'\''
-        console.log("Enter this command in terminal ==> ", cmd)
-        cmd = 'open -a terminal'
-        exec(cmd, (error, stdout, stderr) => {
-            if (error) {
-                console.error(error.message)
-                resolve(error.message)
-            }
-            if (stderr) {
-                console.log(stderr)
-                resolve(stderr);
-            }
-            console.log(stdout)
-            resolve(true);
-        });
-    })
+    await fs.writeFileSync(screenName+'.sh', cmd)
+    return;
+    // return new Promise((resolve) => {
+    //     console.log("Enter this command in terminal ==> ", cmd)
+    //     cmd = 'sh bootnode.sh'
+    //     // console.log("Running cmd ==> ", cmd)
+    //     exec(cmd, (error, stdout, stderr) => {
+    //         if (error) {
+    //             console.error(error.message)
+    //             resolve(error.message)
+    //         }
+    //         if (stderr) {
+    //             console.log(stderr)
+    //             resolve(stderr);
+    //         }
+    //         console.log(stdout)
+    //         resolve(true);
+    //     });
+    // })
 }
 async function runGeth(command, path = '~/fornax/geth/') {
-    if (screen) {
-        // return new Promise((resolve) => {
-        //     exec('screen -S hello -p 0 -X stuff "echo hello' + path + './' + command, (error, stdout, stderr) => {
-        //         if (error) {
-        //             console.error(error.message)
-        //             resolve(error.message)
-        //         }
-        //         if (stderr) {
-        //             console.log(stderr)
-        //             resolve(stderr);
-        //         }
-        //         console.log(stdout)
-        //         resolve(true);
-        //     });
-        // })
-    } else {
         return new Promise((resolve) => {
             exec("" + path + "./" + command, (error, stdout, stderr) => {
                 if (error) {
@@ -185,7 +174,6 @@ async function runGeth(command, path = '~/fornax/geth/') {
                 resolve(true);
             });
         })
-    }
 }
 
 
@@ -432,6 +420,7 @@ async function bootnodeStart() {
                 } else {
                     await runGethWithScreen(config.bootnode.bootnodeStart,'default','bootnode')
                 }
+                await bootnode();
                 break;
             }
             case 'n': {
@@ -483,10 +472,12 @@ async function publicnode() {
         }
         case '3': {
             await publicnodeStart();
+            await publicnode();
             break;
         }
         case '4': {
             await publicnodeDelete();
+            await publicnode();
             break;
         }
         case '0': {
@@ -625,7 +616,20 @@ async function main() {
             } else {
                 let res = await mkdirfull('~/fornax/geth');
                 res = await chmod('~/fornax', "777")
-                res = await cpDir('geth', '~/fornax')
+                if (osValue == 'darwin') {
+                    res = await cpDir('mac/geth', '~/fornax')
+                    console.log("Mac OS");
+                }else if(osValue == 'win32'){
+                    console.log("Window OS")
+                }else if(osValue== 'android') {
+                    console.log("Android OS")
+                }else if(osValue== 'linux') {
+                    res = await cpDir('linux/geth', '~/fornax')
+                    console.log("Linux OS")
+                }
+                else{
+                    console.log("Other os")
+                }
                 await cp('Genesis.json', '~/fornax/Genesis.json')
             }
             await main()

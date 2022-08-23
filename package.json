@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "chmodr": "^1.2.0"
+    "chmodr": "^1.2.0",
+    "shelljs": "^0.8.5"
   }
 }

@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "running geth..."
+screen -S bootnode -d -m -- sh -c '~/fornax/geth/./geth --nat extip:192.168.1.3 --netrestrict 192.168.1.0/24 --identity "fornax" --networkid 13936 --syncmode full --rpcvhosts "*" --http --http.addr 192.168.1.3 --http.port 18545 --http.corsdomain "*" --http.api admin,eth,net,web3 --datadir ~/fornax/bootnode/data --port 30303 console 2>> ~/fornax/bootnode/fornax.log'
